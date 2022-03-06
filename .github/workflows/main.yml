@@ -28,7 +28,7 @@ jobs:
       - name: Verify File
         run: |
           echo "Verify file"
-      - uses: keithweaver/aws-s3-github-action@v1.0.0
+      - uses: keithweaver/aws-s3-github-action@v1.0.0 # Verifies the recursive flag
         name: Copy Folder
         with:
           command: cp
@@ -80,6 +80,7 @@ jobs:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: us-east-1
+          flags: --recursive
       - name: Verify Folder
         run: |
           echo "Verify Folder"
@@ -99,7 +100,7 @@ jobs:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: us-east-1
-      - uses: keithweaver/aws-s3-github-action@v1.0.0
+      - uses: keithweaver/aws-s3-github-action@v1.0.0 # Verifies the input flags on file
         name: Copy Single File (With Flags (Debug))
         with:
           command: cp

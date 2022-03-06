@@ -1,0 +1,125 @@
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Create Test Files
+        run: |
+          touch test1.txt
+          echo "Test 1" >> test1.txt
+          mkdir folder1
+          touch folder1/test2.txt
+          echo "Test 2" >> folder1/test2.txt
+          touch folder1/test3.txt
+          echo "Test 3" >> folder1/test3.txt
+      - uses: keithweaver/aws-s3-github-action@v1.0.0
+        name: Copy Single File
+        with:
+          command: cp
+          source: ./test1.txt
+          destination: s3://keithweaverca-public-us-east-1/verify-aws-s3-action/test1.txt
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: us-east-1
+      - name: Verify File
+        run: |
+          echo "Verify file"
+      - uses: keithweaver/aws-s3-github-action@v1.0.0
+        name: Copy Folder
+        with:
+          command: cp
+          source: ./folder1/
+          destination: s3://keithweaverca-public-us-east-1/verify-aws-s3-action/folder1/
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: us-east-1
+      - name: Verify Folder
+        run: |
+          echo "Verify folder"
+      - name: Create New File for Sync Test
+        run: |
+          touch folder1/test4.txt
+          echo "Test 4" >> folder1/test4.txt
+          echo "Test 2.0" >> folder1/test2.txt
+      - uses: keithweaver/aws-s3-github-action@v1.0.0
+        name: Sync Folder
+        with:
+          command: sync
+          source: ./folder1/
+          destination: s3://keithweaverca-public-us-east-1/verify-aws-s3-action/folder1/
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: us-east-1
+      - name: Verify Folder Sync
+        run: |
+          echo "Verify sync folder"
+          echo "Test 4 and test 2 should have been updated, vs test 3"
+      - uses: keithweaver/aws-s3-github-action@v1.0.0
+        name: Move File
+        with:
+          command: mv
+          source: s3://keithweaverca-public-us-east-1/verify-aws-s3-action/test1.txt
+          destination: s3://keithweaverca-public-us-east-1/verify-aws-s3-action/test1-0.txt
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: us-east-1
+      - name: Verify File
+        run: |
+          echo "Verify file - verify old is gone"
+      - uses: keithweaver/aws-s3-github-action@v1.0.0
+        name: Move Folder
+        with:
+          command: mv
+          source: s3://keithweaverca-public-us-east-1/verify-aws-s3-action/folder1/
+          destination: s3://keithweaverca-public-us-east-1/verify-aws-s3-action/folder1-0/
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: us-east-1
+      - name: Verify Folder
+        run: |
+          echo "Verify Folder"
+      - uses: keithweaver/aws-s3-github-action@v1.0.0
+        name: Remove Single File
+        with:
+          command: rm
+          source: s3://keithweaverca-public-us-east-1/verify-aws-s3-action/test1-0.txt
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: us-east-1
+      - uses: keithweaver/aws-s3-github-action@v1.0.0
+        name: Remove Folder
+        with:
+          command: rm
+          source: s3://keithweaverca-public-us-east-1/verify-aws-s3-action/folder1-0/
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: us-east-1
+      - uses: keithweaver/aws-s3-github-action@v1.0.0
+        name: Copy Single File (With Flags (Debug))
+        with:
+          command: cp
+          source: ./test1.txt
+          destination: s3://keithweaverca-public-us-east-1/verify-aws-s3-action/test1.txt
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: us-east-1
+          flags: --debug
+      - name: Verify File
+        run: |
+          echo "Verify file"
+      - uses: keithweaver/aws-s3-github-action@v1.0.0
+        name: Remove Single File
+        with:
+          command: rm
+          source: s3://keithweaverca-public-us-east-1/verify-aws-s3-action/test1.txt
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: us-east-1
+          flags: --debug
+      - name: Verify File
+        run: |
+          echo "Verify file"
